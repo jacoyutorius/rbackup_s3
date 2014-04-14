@@ -1,0 +1,12 @@
+-
+  - ACCESS_KEY: # AWSのアクセスキー
+  - SECRET_ACCESS_KEY: # AWSのシークレットアクセスキー
+  - BUCKET_NAME: # S3の対象バケット名
+  - SAVE_PERIOD:30 # ファイルの保存期間(日)
+-
+  - ACCESS_KEY: # AWSのアクセスキー
+  - SECRET_ACCESS_KEY: # AWSのシークレットアクセスキー
+  - BUCKET_NAME: # S3の対象バケット名
+  - SAVE_PERIOD:30 # ファイルの保存期間(日)
+
+
