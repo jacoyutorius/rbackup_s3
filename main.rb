@@ -7,6 +7,8 @@ require "pp"
 # remove the object if expired.
 def delete_expired_version s3object, save_days=40
   return if s3object.last_modified.to_date.next_day(save_days) >= Time.now.to_date
+  
+  puts "#{s3object.version_id} deleted"
   s3object.delete
 end
 
