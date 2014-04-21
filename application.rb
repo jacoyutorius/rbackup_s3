@@ -7,10 +7,10 @@ class RBackupS3
 
   def self.run argv
 
+
     if ARGV.length <= 0
       raise "please select upload files..."
     end
-
 
     YAML::load(File.open("setting.yml")).each do |setting|
 

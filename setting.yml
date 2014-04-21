@@ -3,10 +3,7 @@
   AWS_SECRET_ACCESS_KEY:  # AWSのシークレットアクセスキー
   AWS_REGION: ap-northeast-1
   BUCKET_NAME: sample-bucket # S3の対象バケット名
-  SAVE_PERIOD: 30 # ファイルの保存期間(日)
--
-  AWS_ACCESS_KEY_ID:
-  AWS_SECRET_ACCESS_KEY:
-  AWS_REGION: ap-northeast-1
-  BUCKET_NAME:
-  SAVE_PERIOD: 30
+  SAVE_PERIOD:  # ファイルの保存期間(日)
+    5
+    7
+    12
