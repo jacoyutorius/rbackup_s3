@@ -7,10 +7,7 @@ class RBackupS3
 
   def self.run argv
 
-
-    if ARGV.length <= 0
-      raise "please select upload files..."
-    end
+    check_args argv
 
     YAML::load(File.open("setting.yml")).each do |setting|
 
@@ -58,5 +55,14 @@ class RBackupS3
         )
   rescue exeption
     pp exeption
+  end
+
+
+  def self.check_args argv
+
+    raise "please select upload files..." if argv.length <= 0
+
+    raise "'setting.yml' does not exists!" unless File.exists? "setting.yml"
+
   end
 end
