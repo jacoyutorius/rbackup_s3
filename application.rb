@@ -33,13 +33,10 @@ class RBackupS3
 
           setting["SAVE_PERIOD"].each do |period|
 
-            if v.last_modified.to_date.next_day(period) == Time.now.to_date
-              puts "save #{v.version_id} : saved at #{v.last_modified}" 
-              next
-            else
-              puts "delete #{v.version_id} : saved at #{v.last_modified}" 
-              v.delete
-            end
+            next if v.last_modified.to_date.next_day(period) == Time.now.to_date
+            
+            puts "delete #{v.version_id} : saved at #{v.last_modified}" 
+            v.delete
    
           end
         end
