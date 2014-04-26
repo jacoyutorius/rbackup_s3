@@ -29,24 +29,30 @@ class RBackupS3
 
         # issue #2
         # 対象期間+保存した日 = 実行時の日付であれば削除しない
-
-
         obj.versions.each do |v|
-          pp v
-          # next if v.last_modified.to_date.next_day(setting["SAVE_PERIOD"]) >= Time.now.to_date
-          # puts "#{v.version_id} deleted"
-          # v.delete
+
+          setting["SAVE_PERIOD"].each do |period|
+
+            if v.last_modified.to_date.next_day(period) == Time.now.to_date
+              puts "save #{v.version_id} : saved at #{v.last_modified}" 
+              next
+            else
+              puts "delete #{v.version_id} : saved at #{v.last_modified}" 
+              v.delete
+            end
+   
+          end
         end
       end
 
 
-      # uploading
+      # upload
       ARGV.each do |file|
         pp s3.buckets[setting["BUCKET_NAME"]].objects[file].write(:file => file)
       end
     end
   end
-  
+
 
   def self.connect_s3 setting
     s3 = AWS::S3.new(
