@@ -28,7 +28,7 @@ class RBackupS3
         # pp file
 
         delete_expired_object setting, file
-        pp @s3.buckets[setting["BUCKET_NAME"]].objects[filepath].write(:file => path)        
+        pp @s3.buckets[setting["BUCKET_NAME"]].objects[filepath].write(:file => filepath)        
       end
 
     end
