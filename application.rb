@@ -2,63 +2,73 @@ require "rubygems"
 require "yaml"
 require "aws-sdk"
 require "pp"
+require "./rbs3_object_collection"
 
 class RBackupS3
 
   def self.run argv
 
-    # check_args argv
+    check_args argv
 
     YAML::load(File.open("setting.yml")).each do |setting|
 
-      s3 = connect_s3 setting
+      @s3 = connect_s3 setting
 
 
       # buckt's version option is required
-      unless s3.buckets[setting["BUCKET_NAME"]].versioned? 
+      unless @s3.buckets[setting["BUCKET_NAME"]].versioned? 
         puts "the buckert is not version controled! please enable versioning option."
         return 
       end
 
 
-      # remove the object if expired.
-      s3.buckets[setting["BUCKET_NAME"]].objects.each do |obj|
+      ARGV.each do |filepath|
 
-        # issue #2
-        # 対象期間+保存した日 = 実行時の日付であれば削除しない
-        obj.versions.each do |v|
+        file = filepath.split('\\')[-1]
+        # pp file
 
-          setting["SAVE_PERIOD"].each do |period|
-
-            last_modified_next = v.last_modified.to_date.next_day(period).strftime("%Y-%m-%d")
-            today = Time.now.strftime("%Y-%m-%d")
-
-            # puts "#{last_modified_next} : #{today}"
-            next if last_modified_next == today
-            puts "delete #{obj.key}, #{v.version_id} : saved at #{v.last_modified}"
-            v.delete
-   
-          end
-        end
+        delete_expired_object setting, file
+        pp @s3.buckets[setting["BUCKET_NAME"]].objects[filepath].write(:file => path)        
       end
 
-
-      # upload
-      ARGV.each do |file|
-        pp s3.buckets[setting["BUCKET_NAME"]].objects[file].write(:file => file)
-      end
     end
   rescue => exception
     pp exception
   end
 
   def self.connect_s3 setting
-    s3 = AWS::S3.new(
+    AWS::S3.new(
           access_key_id: setting["AWS_ACCESS_KEY_ID"],
           secret_access_key: setting["AWS_SECRET_ACCESS_KEY"]
         )
   rescue => exeption
     pp exeption
+  end
+
+
+  #issue #4
+  def self.delete_expired_object backup_setting, file
+    
+    pp file
+    obj = @s3.buckets[backup_setting["BUCKET_NAME"]].objects.filter_by_key(file)[0]
+    return if obj.nil?
+
+    # issue #2
+    # 対象期間+保存した日 = 実行時の日付であれば削除しない
+    obj.versions.each do |v|
+
+      backup_setting["SAVE_PERIOD"].each do |period|
+
+        last_modified_next = v.last_modified.to_date.next_day(period).strftime("%Y-%m-%d")
+        today = Time.now.strftime("%Y-%m-%d")
+
+        #issue #3
+        next if last_modified_next == today
+        puts "delete #{obj.key}, #{v.version_id} : saved at #{v.last_modified}"
+        v.delete
+
+      end
+    end
   end
 
 
