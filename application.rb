@@ -7,7 +7,7 @@ class RBackupS3
 
   def self.run argv
 
-    check_args argv
+    # check_args argv
 
     YAML::load(File.open("setting.yml")).each do |setting|
 
@@ -30,9 +30,12 @@ class RBackupS3
 
           setting["SAVE_PERIOD"].each do |period|
 
-            next if v.last_modified.to_date.next_day(period) == Time.now.to_date
-            
-            puts "delete #{v.version_id} : saved at #{v.last_modified}" 
+            last_modified_next = v.last_modified.to_date.next_day(period).strftime("%Y-%m-%d")
+            today = Time.now.strftime("%Y-%m-%d")
+
+            # puts "#{last_modified_next} : #{today}"
+            next if last_modified_next == today
+            puts "delete #{obj.key}, #{v.version_id} : saved at #{v.last_modified}"
             v.delete
    
           end
@@ -45,15 +48,16 @@ class RBackupS3
         pp s3.buckets[setting["BUCKET_NAME"]].objects[file].write(:file => file)
       end
     end
+  rescue => exception
+    pp exception
   end
-
 
   def self.connect_s3 setting
     s3 = AWS::S3.new(
           access_key_id: setting["AWS_ACCESS_KEY_ID"],
           secret_access_key: setting["AWS_SECRET_ACCESS_KEY"]
         )
-  rescue exeption
+  rescue => exeption
     pp exeption
   end
 
@@ -62,7 +66,11 @@ class RBackupS3
 
     raise "please select upload files..." if argv.length <= 0
 
-    raise "'setting.yml' does not exists!" unless File.exists? "setting.yml"
+    raise "'setting.yml' does not exist!" unless File.exists? "setting.yml"
+
+    argv.each do |v|
+      raise "'#{v}' does not exist!!" unless File.exists? v
+    end
 
   end
 end
